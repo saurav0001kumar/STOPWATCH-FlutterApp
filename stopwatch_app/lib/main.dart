@@ -108,7 +108,7 @@ class MyAppState extends State<MyApp> {
           ],
         ),
       ),
-      backgroundColor: Colors.amber.shade50,
+//     
       appBar: AppBar(
         titleSpacing: 0,
         elevation: 5,
@@ -213,6 +213,7 @@ class sw extends StatefulWidget {
 }
 
 class swState extends State<sw> {
+  static List laptime=[];
   static int hr = 0, min = 0;
   static String str_hr = "0", str_min = "0";
   static int elapsed = 3600000;
@@ -468,6 +469,7 @@ class swState extends State<sw> {
                               str_min = "0";
                               _stopWatchTimer.onExecute
                                   .add(StopWatchExecute.reset);
+                              laptime.clear();
                             },
                             child: Icon(
                               Icons.stop,
@@ -496,8 +498,13 @@ class swState extends State<sw> {
                             color: Colors.white,
                             shape: const StadiumBorder(),
                             onPressed: () async {
-                              _stopWatchTimer.onExecute
-                                  .add(StopWatchExecute.lap);
+                              if(_stopWatchTimer.isRunning())
+                                {
+                                  _stopWatchTimer.onExecute
+                                      .add(StopWatchExecute.lap);
+                                  laptime.add("$str_hr$hr:$str_min$min:${displayTime.split(".")[0].split(":")[1]}:${displayTime.split(".")[1]}");
+                                }
+
                             },
                             child: Icon(
                               Icons.outlined_flag,
@@ -523,7 +530,7 @@ class swState extends State<sw> {
             initialData: _stopWatchTimer.records.value,
             builder: (context, snap) {
               final value = snap.data;
-              if (value.isEmpty) {
+              if (laptime.isEmpty) {
                 return Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
@@ -589,18 +596,18 @@ class swState extends State<sw> {
                     duration: const Duration(milliseconds: 200),
                     curve: Curves.easeOut);
               });
-              print('Listen records. $value');
+              print('Listen laptime. $laptime');
               return ListView.builder(
                 controller: _scrollController,
                 scrollDirection: Axis.vertical,
                 itemBuilder: (BuildContext context, int index) {
-                  final data = value[index];
+                  final data = laptime[index];
                   return Column(
                     children: <Widget>[
                       Padding(
                         padding: const EdgeInsets.only(top: 5, bottom: 5),
                         child: Text(
-                          'LAP ${index + 1}     $str_hr$hr:$str_min$min:${displayTime.split(".")[0].split(":")[1]}:${data.displayTime.split(".")[1]}',
+                          'LAP ${index + 1}     ${laptime[index]}',
                           style: TextStyle(
                               fontSize: 17,
                               fontFamily: 'Helvetica',
@@ -613,7 +620,7 @@ class swState extends State<sw> {
                     ],
                   );
                 },
-                itemCount: value.length,
+                itemCount: laptime.length,
               );
             },
           ),
